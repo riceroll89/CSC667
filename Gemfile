@@ -23,6 +23,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # gem 'unicorn'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
+
+gem 'devise'
 group :development, :test do
   gem 'sqlite3',     '1.3.9'
   gem 'byebug',      '3.4.0'
