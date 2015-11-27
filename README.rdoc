@@ -1,6 +1,7 @@
 == README ==
 
-https://powerful-bayou-9146.herokuapp.com/ deployed to Heroku
+https://powerful-bayou-9146.herokuapp.com/ deploye to Heroku
+Heroku Repo URL: git@heroku.com:powerful-bayou-9146.git
 
 This README would normally document whatever steps are necessary to get the
 application up and running.
