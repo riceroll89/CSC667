@@ -1,0 +1,16 @@
+h2{
+	color: red;
+}
+
+body{
+	color: white;
+	text-align: center;
+	background-image: url("/images/cover.jpg");
+	background-repeat: no-repeat;
+	font-family: "Courier New", Courier, monospace;
+}
+
+.login{
+	position: relative;
+	top:350px;
+}
