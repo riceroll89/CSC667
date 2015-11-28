@@ -5,12 +5,14 @@ h2{
 body{
 	color: white;
 	text-align: center;
-	background-image: url("/images/cover.jpg");
+	background-image: url("/images/cover2.jpg");
 	background-repeat: no-repeat;
+	background-size: cover;
 	font-family: "Courier New", Courier, monospace;
 }
 
 .login{
-	position: relative;
-	top:330px;
+	position: absolute;
+	left: 41%;
+	top: 65%;
 }
