@@ -5,7 +5,7 @@
 
 	<div id="header">
 	<div id="setting">
-	<!- Login: just used devise gem ->
+	<!- Login: just used the devise gem ->
 	<% if user_signed_in? %>
 	Logged in as <strong><%= current_user.email %></strong>.
 	<%= link_to "Settings", edit_user_registration_path, :class => "navbar-link" %> |
@@ -24,9 +24,18 @@
 	<div id="contents">
 	<div id="table">
 	<ul style="list-style-type:none">
+		A
+		<%= link_to  image_tag("tableA.gif", :border => 2, :margin => 30), '/game/game' %>
+		B
+		<%= link_to  image_tag("tableB.gif", :border => 2, :margin => 30), '/game/game' %>
+		C
+		<%= link_to  image_tag("tableC.gif", :border => 2, :margin => 30), '/game/game' %>
+
+		<!--
 		<li><button type="button" style="background: url(/images/tableA.gif)">Table A</button></li>
 		<li><button type="button" style="background: url(/images/tableB.gif)">Table B</button></li>
 		<li><button type="button" style="background: url(/images/tableC.gif)">Table C</button></li>
+		-->
 	</ul>
 	</div>
 
