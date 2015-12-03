@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
   devise_for :users
   get 'home/index'
-  get 'game/game', to: 'game#game'
+  get 'game/tableA', to: 'game#tableA'
+  get 'game/tableB', to: 'game#tableB'
+  get 'game/tableC', to: 'game#tableC'
   
 
   # The priority is based upon order of creation: first created -> highest priority.
