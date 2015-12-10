@@ -1,283 +1,248 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
-
-<!--
- This file has been put into the public domain by its
- author, David Eck (http://math.hws.edu/eck), with no
- guarantees or claims about what it might be good for.
- Please note that the card images used in this game are
- from the Gnome Desktop project, which uses the GPL
- license.  The prototype and scriptaculous JavaScript
- libraries that are used on this page have their own license.
--->
 
 <html>
 <head>
-<title>Blackjack in Javascript</title>
+<title>Blackjack</title>
+<%= stylesheet_link_tag "table.css" %>
+<script LANGUAGE="JavaScript1.1">
 
-<script type="text/javascript" src="Card.js"></script>
-<script type="text/javascript" src="DisplayedCard.js"></script>
-<script type="text/javascript" src="js/prototype.js"></script>
-<script type="text/javascript" src="js/scriptaculous.js?load=effects"></script>
+var dealer_hand = new Array();
+var player_hand = new Array();
+var game_over = false;
 
-<script type="text/javascript">
 
-var dealerCards = [];  // Arrays holding the DisplayCard objects used to show the cards
-var playerCards = [];
+// Constructor for Card objects
+function Card(num,suit) {
+   this.num = num;
+   this.suit = suit;
+   this.fname = fname;
+}
+function fname() {
+   return "/images/trump/gif/"+ this.suit + this.num +".gif";
+}
+// The function fname() makes a filename for an image.
+// The filenames are a concatenation of card number and suit
+// Ace = 1 and King = 13
 
-dealerCards.count = 0;  // Number of cards actually in the dealer's hand
-playerCards.count = 0;   // Number of cards actually in the player's hand
+
+// Constructor for Deck Object
+function Deck() {
+   this.cards = new Array(52);
+   this.next_card = 0;
+   // fill the deck (in order, for now)
+   for (i=1; i<14; i++) {
+     this.cards[i-1] = new Card(i,"c");
+     this.cards[i+12] = new Card(i,"h");
+     this.cards[i+25] = new Card(i,"s");
+     this.cards[i+38] = new Card(i,"d");
+   }
+   this.shuffle = shuffle;
+   this.dealCard = dealCard;
+}
+function shuffle() {
+   for (i=1; i<1000; i++) {
+      // switch two randomly selected cards
+      card1 = Math.floor( 52*Math.random() );
+      card2 = Math.floor( 52*Math.random() );
+      temp = this.cards[card2];
+      this.cards[card2] = this.cards[card1];
+      this.cards[card1] = temp;
+   }
+   this.next_card = 0;
+}
+function dealCard() {
+   return this.cards[ this.next_card++ ];
+}
+
 
 var deck = new Deck();
-
-var gameInProgress = false;
-
-var bet;
-var betInput;
-var money;
-var moneyDisplay;
-var message;
-
-var standButton, hitButton, newGameButton;  // objects representing the buttons, so I can enable/disable them
-
-function setup() {
-    for (var i = 1; i <= 5; i++) {
-       dealerCards[i] = new DisplayedCard("dealer" + i);
-       dealerCards[i].cardContainer.style.display = "none";
-       playerCards[i] = new DisplayedCard("player" + i);
-       playerCards[i].cardContainer.style.display = "none";
-    }
-    message = document.getElementById("message");
-    standButton = document.getElementById("standButton");
-    hitButton = document.getElementById("hitButton");
-    newGameButton = document.getElementById("newGameButton");
-    moneyDisplay = document.getElementById("money");
-    money = 100;
-    moneyDisplay.innerHTML = "$" + money;
-    betInput = document.getElementById("bet");
-    betInput.value = 10;
-    betInput.disabled = false;
-    standButton.disabled = true;
-    hitButton.disabled = true;
-    newGameButton.disabled = false;
-}
+deck.shuffle();
 
 
-function dealCard(cards, runOnFinish, faceDown) {
-    var crd = deck.nextCard();
-    cards.count++;
-    if (faceDown)
-       cards[cards.count].setFaceDown();
-    else
-       cards[cards.count].setFaceUp();
-    cards[cards.count].setCard(crd);
-    new Effect.SlideDown(cards[cards.count].cardContainer, {
-       duration: 0.5,
-       queue: "end",
-       afterFinish: runOnFinish
-    });
-}
+function newGame() {
 
-function getTotal(hand) {
-   var total = 0;
-   var ace = false;
-   for (var i = 1; i <= hand.count; i++) {
-       total += Math.min(10, hand[i].card.value); 
-       if (hand[i].card.value == 1)
-          ace = true;
+   if ( deck.next_card > 39 ) {  // shuffle the deck if 75% of
+      deck.shuffle();            // the cards have been used.
    }
-   if (total + 10 <= 21 && ace)
-      total += 10;
-   return total;
-}
+   dealer_hand = new Array();
+   player_hand = new Array();
 
-function startGame() {
-   if (!gameInProgress) {
-      var betText = betInput.value;
-      if ( ! betText.match(/^[0-9]+$/) || betText < 1 || betText > money) {
-          message.innerHTML = "Bet must be a number between 1 and " + money + 
-               ".<br>Fix this problem and press New Game again.";
-          new Effect.Shake("betdiv");
-          return;
-      }
-      betInput.disabled = true;
-      bet = Number(betText);
-      for (var i = 1; i <= 5; i++) {
-          playerCards[i].cardContainer.style.display = "none";
-          playerCards[i].setFaceDown();
-          dealerCards[i].cardContainer.style.display = "none";
-          dealerCards[i].setFaceDown();
-      }
-      message.innerHTML = "Dealing Cards";
-      deck.shuffle();
-      dealerCards.count = 0;
-      playerCards.count = 0;
-      dealCard(playerCards);
-      dealCard(dealerCards);
-      dealCard(playerCards);
-      dealCard(dealerCards, function() {
-             standButton.disabled = false;
-             hitButton.disabled = false;
-             newGameButton.disabled = true;
-             gameInProgress = true;
-             var dealerTotal = getTotal(dealerCards);
-             var playerTotal = getTotal(playerCards);
-             if (dealerTotal == 21) {
-                if (playerTotal == 21)
-                    endGame(false, "You both have Blackjack, but dealer wins on ties.");
-                else
-                    endGame(false, "Dealer has Blackjack.");
-             }
-             else if (playerTotal == 21)
-                endGame(true, "You have Blackjack.");
-             else
-                message.innerHTML = "You have " + playerTotal +".  Hit or Stand?";
-          }, true);
+// Deal and Display cards
+
+   dealer_hand[ 0 ] = deck.dealCard();   // This is the hole card.
+   document.images[0].src = "/images/trump/gif/z01.gif"; // The hole card is not shown
+   dealer_hand[ 1 ] = deck.dealCard();
+   document.images[ 1 ].src = dealer_hand[ 1 ].fname();
+   for ( i=2; i<6; i++) {
+      document.images[i].src = "/images/trump/gif/z01.gif";
    }
-}
 
-function endGame(win, why) {
-     if (win)
-         money += bet;
-     else
-         money -= bet;
-     message.innerHTML = (win ? "Congratulations! You win.  " : "Sorry! You lose.  ") + why + 
-           (money > 0 ? "<br>Click New Game to play again." : "<br>Looks like you've run out of money!");
-     standButton.disabled = true;
-     hitButton.disabled = true;
-     newGameButton.disabled = true;
-     gameInProgress = false;
-     if (dealerCards[2].faceDown) {
-       dealerCards[2].cardContainer.style.display = "none";
-       dealerCards[2].setFaceUp();
-       new Effect.SlideDown(dealerCards[2].cardContainer, { duration: 0.5, queue: "end" });
-     }
-     new Effect.Fade(moneyDisplay, {
-        duration: 0.5,
-        queue: "end",
-        afterFinish: function() {
-            moneyDisplay.innerHTML = "$" + money;
-            new Effect.Appear(moneyDisplay, {
-               duration: 0.5,
-               queue: "end",
-               afterFinish: function() {
-                   if (money <= 0) {
-                        betInput.value = "BUSTED";
-                        new Effect.Shake(moneyDisplay);
-                   }
-                   else {
-                       if (bet > money)
-                          betInput.value = money;
-                       standButton.disabled = true;
-                       hitButton.disabled = true;
-                       newGameButton.disabled = false;
-                       betInput.disabled = false;
-                   }
-               }
-            });
-        }
-     });
-}
+   player_hand[ 0 ] = deck.dealCard();
+   document.images[ 6 ].src = player_hand[ 0 ].fname();
+   player_hand[ 1 ] = deck.dealCard();
+   document.images[ 7 ].src = player_hand[ 1 ].fname();
+   for (i=8; i<12; i++) {
+      document.images[i].src = "/images/trump/gif/z02.gif";
+   }
 
+// Reset the form fields and the state variables
+   window.status = "";
+   document.form1.dealer.value = "";
+   document.form1.result.value = "";
+   document.form1.player.value = score( player_hand );
+   game_over = false;
 
-function dealersTurnAndEndGame() {
-    message.innerHTML = "Dealer's turn...";
-    dealerCards[2].cardContainer.style.display = "none";
-    dealerCards[2].setFaceUp();
-    var takeNextCardOrFinish = function() {
-       new Effect.SlideDown(dealerCards[dealerCards.count].cardContainer, {
-          duration: 0.5,
-          queue: "end",
-          afterFinish: function() {
-              var dealerTotal = getTotal(dealerCards);
-              if (dealerCards.count < 5 && dealerTotal <= 16) {
-                  dealerCards.count++;
-                  dealerCards[dealerCards.count].setCard(deck.nextCard());
-		          dealerCards[dealerCards.count].setFaceUp();
-                  takeNextCardOrFinish();
-              }
-              else if (dealerTotal > 21)
-                 endGame(true, "Dealer has gone over 21.");
-              else if (dealerCards.count == 5)
-                 endGame(false, "Dealer took 5 cards without going over 21.");
-              else {
-                 var playerTotal = getTotal(playerCards);
-                 if (playerTotal > dealerTotal)
-                    endGame(true, "You have " + playerTotal + ". Dealer has " + dealerTotal + ".");
-                 else if (playerTotal < dealerTotal)
-                    endGame(false, "You have " + playerTotal + ". Dealer has " + dealerTotal + ".");
-                 else
-                    endGame(false, "You and the dealer are tied at " + playerTotal + ".");
-              }
-          }
-       });
-    };
-    takeNextCardOrFinish();
-}
+} // end function newGame()
+
 
 function hit() {
-   if (!gameInProgress)
-      return;
-   standButton.disabled = true;
-   hitButton.disabled = true;
-   dealCard(playerCards, function() {
-      var playerTotal = getTotal(playerCards);
-      if (playerTotal > 21)
-         endGame(false, "YOU WENT OVER 21!");
-      else if (playerCards.count == 5)
-         endGame(true, "You took 5 cards without going over 21.");
-      else if (playerTotal == 21)
-         dealersTurnAndEndGame();
-      else {
-         message.innerHTML = "You have " + playerTotal + ". Hit or Stand?";
-         hitButton.disabled = false;
-         standButton.disabled = false;
+   var total = 0;
+   var new_card = 0;  // index for the new card position
+   if ( game_over ) {
+      window.status = "Game over.  Click the Deal button to start a new hand."
+   } else {
+      new_card = player_hand.length;
+      player_hand[ new_card ] = deck.dealCard();
+      document.images[ new_card + 6 ].src = player_hand[ new_card ].fname();
+      total = score( player_hand );
+      if ( total > 21 ) {  // Busted, game over.
+         document.form1.player.value = total + "  busted";
+         alert("You busted! You went over 21...(；ﾟДﾟ)")
+         document.images[ 0 ].src = dealer_hand[ 0 ].fname(); // reveal the dealer hole card
+         document.form1.dealer.value = score( dealer_hand );
+         winner();
+         game_over = true;
+      } else {
+         document.form1.player.value = total;
       }
-   });
-}
+   }
+} // end function hit()
+
 
 function stand() {
-   if (!gameInProgress)
-      return;
-   hitButton.disabled = true;
-   standButton.disabled = true;
-   dealersTurnAndEndGame();
+   var total = 0;
+   var new_card = 0;  // index for the new card position
+   if ( game_over ) {
+      window.status = "Game over.  Click the Deal button to start a new hand."
+   } else {
+
+      document.images[ 0 ].src = dealer_hand[ 0 ].fname(); // reveal the dealer hole card
+      while ( score( dealer_hand ) < 17 ) {  // Dealer stands on soft 17
+         new_card = dealer_hand.length;
+         dealer_hand[ new_card ] = deck.dealCard();
+         document.images[ new_card ].src = dealer_hand[ new_card ].fname();
+      }
+
+      total = score( dealer_hand );
+      if ( total > 21 ) {  // Busted
+         document.form1.dealer.value = total + "  busted";
+      } else {
+         document.form1.dealer.value = total;
+      }
+
+   }
+   winner();
+   game_over = true; // The game ends after the player stands.
+
+} // end function stand()
+
+
+function score(hand) {
+   var total = 0;
+   var soft = 0; // This variable counts the number of aces in the hand.
+   var pips = 0; // The trump pictures on a card used to be called pips.
+   for ( i=0; i<hand.length; i++ ) {
+      pips = hand[i].num;
+      if ( pips == 1 ) { 
+         soft = soft + 1;
+         total = total + 11;
+      } else {
+         if ( pips == 11 || pips == 12 || pips == 13 ) {
+            total = total + 10;
+         } else {
+            total = total + pips;
+         }
+      }
+   }
+   while ( soft > 0 && total > 21 ) {  // Count the aces as 1 instead
+      total = total - 10;              // of 11 if the total is over 21
+      soft = soft - 1;
+   }   
+   return total;
+}  // end function score
+
+
+function winner() {
+   var player_total = score( player_hand );
+   var dealer_total = score( dealer_hand );
+   if ( player_total > 21 ) {  // Busted
+
+      document.form1.result.value = "Dealer wins";
+   } else {
+      if ( dealer_total > 21 ) { // Busted
+         alert("Dealer busted! You won!　(ﾟ∀ﾟ)")
+         document.form1.result.value = "Player wins";
+      } else {
+         if ( player_total  == dealer_total ) {
+            alert("Tie game...(´・ω・｀)")
+            document.form1.result.value = "Tie game";
+         } else {
+            if ( player_total  > dealer_total ) {
+                alert("You won! (*ﾟ∀ﾟ)")
+               document.form1.result.value = "Player wins";
+            } else {
+                alert("You lose...(´；ω；｀)")
+               document.form1.result.value = "Dealer wins";
+            }
+         }
+      }
+   }
 }
 
-onload=setup;
 
 </script>
+
 </head>
+
 <body>
-<table align=center cellpadding=0 cellspacing=10 border=0;>
-<tr><td>
-<div style="position: relative; border: thick solid #660; background-color: #280; width: 579px; height:500px">
-    <div style="position: absolute; left:20px; top:15px; color:#9F9; font-size:large">Dealer's cards:</div>
-    <div id="dealer1" style="position: absolute; left: 50px; top:50px;  border: 2px solid #660; background-color: #660"></div>
-    <div id="dealer2" style="position: absolute; left: 150px; top:50px;  border: 2px solid #660; background-color: #660"></div>
-    <div id="dealer3" style="position: absolute; left: 250px; top:50px;  border: 2px solid #660; background-color: #660"></div>
-    <div id="dealer4" style="position: absolute; left: 350px; top:50px;  border: 2px solid #660; background-color: #660"></div>
-    <div id="dealer5" style="position: absolute; left: 450px; top:50px;  border: 2px solid #660; background-color: #660"></div>
-    <div style="position: absolute; left:20px; top:210px; color:#9F9; font-size:large">Your cards:</div>
-    <div id="player1" style="position: absolute; left: 50px; top:250px;  border: 2px solid #660; background-color: #660"></div>
-    <div id="player2" style="position: absolute; left: 150px; top:250px;  border: 2px solid #660; background-color: #660"></div>
-    <div id="player3" style="position: absolute; left: 250px; top:250px;  border: 2px solid #660; background-color: #660"></div>
-    <div id="player4" style="position: absolute; left: 350px; top:250px;  border: 2px solid #660; background-color: #660"></div>
-    <div id="player5" style="position: absolute; left: 450px; top:250px;  border: 2px solid #660; background-color: #660"></div>
-    <div style="position: absolute; left:20px; top: 410px; color:#9F9; font-size:large">You have:</div>
-    <div id="money" style="position: absolute; left: 70px; top:445px; color:yellow; font-size:x-large"></div>
-    <div id="betdiv" style="position:absolute; left:300px; top:425px">
-       <span style="color:#9F9">Your bet:</span>&nbsp; <input type=text size=6 id="bet">
-    </div>
-</div>
-</td></tr>
-<tr><td align=center>
-<input type=button id="hitButton" value="Hit" onclick="hit()" disabled>
-<input type=button id="standButton" value="Stand" onclick="stand()" disabled>
-<input type=button id="newGameButton" value="New Game" onClick="startGame()">
-</td></tr>
-<tr><td align=center>
-<span id="message" style="color:#600; font-weight:bold">Welcome to Blackjack!<br>Click "New Game" to Begin.</span>
-</td></tr>
+<h1>Blackjack</h1>
+<hr>
+<form NAME="form1">
+<table>
+<tr>
+  <td> <B>Dealer: </B>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
+  <td> </td>
+</tr>
+<tr>
+  <td> <B>Player: <B>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z02.gif"height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
+</tr>
+<tr>
+  <td> <B>Dealer Score:</B><BR>
+       <input TYPE="TEXT" SIZE=10 NAME="dealer" VALUE="0"></td>
+  <td> <B>Player Score:</B><BR>
+       <input TYPE="TEXT" SIZE=10 NAME="player" VALUE="0">
+  <td> <input TYPE="BUTTON" VALUE="      Stand      " onClick="stand();">
+  <td> <input TYPE="BUTTON" VALUE="         Hit         " onClick="hit();">
+  <td> <a href="#" onClick="newGame();"
+        onMouseOver = "window.status = 'Deal a new hand.'; return true; "
+        onMouseOut = "window.status = '';">
+       <img border=0 src="/images/deal.gif" height=50 width=106></a>
+  <td> <B>Game Result:</B><BR>
+       <input TYPE="TEXT" SIZE=10 NAME="result" VALUE=""</td>
+</tr>
 </table>
+</form>
+
 </body>
+</html>
