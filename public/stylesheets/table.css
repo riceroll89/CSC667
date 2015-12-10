@@ -1,5 +1,32 @@
 body {
-	text-align: center;
-	background-color: #339966;
+	
 	font-family: "Courier New", Courier, monospace;
 }
+
+h1{
+	background-color: white;
+	opacity: 0.9;
+}
+
+body{
+	background-image: url("/images/table.jpg");
+}
+
+#content{
+	border-style: double;
+	background-color: #339966;
+	opacity: 0.9;
+}
+
+#header{
+	padding-left: 20%;
+	width: auto;
+	height: 130px;
+	content: url("/images/logo.png");
+}
+#fotter{
+	background-color: white;
+	padding-left: 20%;
+	opacity: 0.8;
+}
+

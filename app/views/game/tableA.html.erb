@@ -204,8 +204,9 @@ function winner() {
 </head>
 
 <body>
-<h1>Blackjack</h1>
-<hr>
+<div id="header">
+</div>
+<div id="content">
 <form NAME="form1">
 <table>
 <tr>
@@ -243,6 +244,12 @@ function winner() {
 </tr>
 </table>
 </form>
+</div>
 
+<div id="fotter">
+<h2>
+<%= link_to "Click here to leave this table", new_user_session_path, :class => 'navbar-link' %>
+</h2>
+</div>
 </body>
 </html>
