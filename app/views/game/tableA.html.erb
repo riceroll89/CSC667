@@ -2,7 +2,13 @@
 <html>
 <head>
 <title>Blackjack</title>
+
+<div id="setting">
+Logged in as <strong><%= current_user.email %></strong>.
+    <%= link_to "Settings", edit_user_registration_path, :class => "navbar-link" %> |
+    <%= link_to "Logout", destroy_user_session_path, method: :delete, :class => "navbar-link" %>
 <%= stylesheet_link_tag "table.css" %>
+</div>
 <script LANGUAGE="JavaScript1.1">
 
 var dealer_hand = new Array();
@@ -106,11 +112,12 @@ function hit() {
       total = score( player_hand );
       if ( total > 21 ) {  // Busted, game over.
          document.form1.player.value = total + "  busted";
-         alert("You busted! You went over 21...(；ﾟДﾟ)")
          document.images[ 0 ].src = dealer_hand[ 0 ].fname(); // reveal the dealer hole card
          document.form1.dealer.value = score( dealer_hand );
          winner();
+         alert("You busted! You went over 21...(；ﾟДﾟ)")
          game_over = true;
+
       } else {
          document.form1.player.value = total;
       }
@@ -211,22 +218,22 @@ function winner() {
 <table>
 <tr>
   <td> <B>Dealer: </B>
-  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z01.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z01.gif" height=176 width=136>
   <td> </td>
 </tr>
 <tr>
   <td> <B>Player: <B>
-  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z02.gif"height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
-  <td> <img border=0 src="/images/trump/gif/z02.gif" height=136 width=106>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=176 width=136>
+  <td> <img border=0 src="/images/trump/gif/z02.gif" height=176 width=136>
 </tr>
 <tr>
   <td> <B>Dealer Score:</B><BR>
@@ -245,7 +252,7 @@ function winner() {
 </table>
 </form>
 </div>
-
+<br><br><br><br>
 <div id="fotter">
 <h2>
 <%= link_to "Click here to leave this table", new_user_session_path, :class => 'navbar-link' %>
