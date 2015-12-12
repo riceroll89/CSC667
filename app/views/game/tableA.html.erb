@@ -9,6 +9,8 @@ Logged in as <strong><%= current_user.email %></strong>.
     <%= link_to "Logout", destroy_user_session_path, method: :delete, :class => "navbar-link" %>
 <%= stylesheet_link_tag "table.css" %>
 </div>
+
+
 <script LANGUAGE="JavaScript1.1">
 
 var dealer_hand = new Array();
@@ -116,6 +118,7 @@ function hit() {
          document.form1.dealer.value = score( dealer_hand );
          winner();
          alert("You busted! You went over 21...(；ﾟДﾟ)")
+
          game_over = true;
 
       } else {
